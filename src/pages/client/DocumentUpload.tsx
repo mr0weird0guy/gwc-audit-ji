@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { mockTasks } from '@/services/mockData';
-import { FileUpload, X, Check, File } from 'lucide-react';
+import { Upload, X, Check, File } from 'lucide-react';
 
 const DocumentUpload: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState('');
@@ -139,7 +139,7 @@ const DocumentUpload: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="file-upload">File Upload</Label>
                   <div className="border-2 border-dashed rounded-md p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => document.getElementById('file-upload')?.click()}>
-                    <FileUpload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm font-medium">Click to upload or drag and drop</p>
                     <p className="text-xs text-muted-foreground mt-1">PDF, DOC, XLS, JPG, PNG (Max size: 10MB)</p>
                     <Input 
