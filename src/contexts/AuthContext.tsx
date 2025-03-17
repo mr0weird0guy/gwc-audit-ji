@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 // Define user types
 export type UserRole = 'admin' | 'client' | 'employee';
@@ -49,7 +48,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const navigate = useNavigate();
 
   // Check if user is already logged in on initial load
   useEffect(() => {
@@ -75,28 +73,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(userWithoutPassword);
     setIsAuthenticated(true);
     localStorage.setItem('user', JSON.stringify(userWithoutPassword));
-
-    // Redirect based on user role
-    switch (userWithoutPassword.role) {
-      case 'admin':
-        navigate('/admin/dashboard');
-        break;
-      case 'client':
-        navigate('/client/dashboard');
-        break;
-      case 'employee':
-        navigate('/employee/dashboard');
-        break;
-      default:
-        navigate('/');
-    }
   };
 
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('user');
-    navigate('/login');
   };
 
   return (
