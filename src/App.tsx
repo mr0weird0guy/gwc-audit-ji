@@ -11,6 +11,7 @@ import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import DocumentUpload from "./pages/client/DocumentUpload";
+import DocumentDownload from "./pages/client/DocumentDownload";
 import TaskDetails from "./pages/employee/TaskDetails";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -41,6 +42,11 @@ const App = () => (
         <Route path="/client/document-upload" element={
           <ProtectedRoute allowedRoles={['client']}>
             <DocumentUpload />
+          </ProtectedRoute>
+        } />
+        <Route path="/client/document-download" element={
+          <ProtectedRoute allowedRoles={['client']}>
+            <DocumentDownload />
           </ProtectedRoute>
         } />
         

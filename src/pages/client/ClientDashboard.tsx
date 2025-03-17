@@ -8,6 +8,9 @@ import { mockTasks, mockDocuments } from '@/services/mockData';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Upload, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ServiceProgress from '@/components/client/ServiceProgress';
+import NotificationPanel from '@/components/client/NotificationPanel';
+import DocumentRepository from '@/components/document/DocumentRepository';
 
 const ClientDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +18,38 @@ const ClientDashboard: React.FC = () => {
   // For client view, we'll filter to display fewer tasks
   const clientTasks = mockTasks.slice(0, 4);
   const pendingDocuments = mockDocuments.filter(doc => doc.status === 'pending');
+
+  // Mock services for progress tracking
+  const mockServices = [
+    { 
+      id: '1', 
+      name: 'Tax Filing 2023', 
+      progress: 75, 
+      deadline: 'May 15, 2023', 
+      status: 'ongoing' as const 
+    },
+    { 
+      id: '2', 
+      name: 'Quarterly Financial Audit', 
+      progress: 100, 
+      deadline: 'Apr 30, 2023', 
+      status: 'completed' as const 
+    },
+    { 
+      id: '3', 
+      name: 'Compliance Check', 
+      progress: 10, 
+      deadline: 'Jun 20, 2023', 
+      status: 'pending' as const 
+    },
+    { 
+      id: '4', 
+      name: 'Annual Report', 
+      progress: 0, 
+      deadline: 'Mar 15, 2023', 
+      status: 'overdue' as const 
+    }
+  ];
 
   return (
     <Layout>
@@ -85,30 +120,13 @@ const ClientDashboard: React.FC = () => {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Documents Required</CardTitle>
-            <CardDescription>Items that need your attention</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {pendingDocuments.map(doc => (
-                <div key={doc.id} className="flex items-center justify-between border-b pb-3">
-                  <div className="flex items-center">
-                    <FileText className="h-5 w-5 text-muted-foreground mr-2" />
-                    <div>
-                      <p className="font-medium">{doc.name}</p>
-                      <p className="text-xs text-muted-foreground">{doc.size} · {doc.uploadDate}</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => navigate('/client/document-upload')}>
-                    Upload
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <ServiceProgress services={mockServices} />
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <NotificationPanel />
+        
+        <DocumentRepository />
       </div>
       
       <Card>
