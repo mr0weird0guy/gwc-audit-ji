@@ -78,13 +78,13 @@ const DocumentDownload: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search documents..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-                icon={<Search className="h-4 w-4" />}
+                className="pl-9 w-full"
               />
             </div>
             <div className="w-full md:w-64">
