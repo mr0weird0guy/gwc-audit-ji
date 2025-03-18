@@ -14,6 +14,8 @@ import EmployeeManagement from "./pages/admin/EmployeeManagement";
 import ServiceManagement from "./pages/admin/ServiceManagement";
 import Reports from "./pages/admin/Reports";
 import Settings from "./pages/admin/Settings";
+import ClientDetail from "./pages/admin/ClientDetail";
+import ServiceDetail from "./pages/admin/ServiceDetail";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import DocumentUpload from "./pages/client/DocumentUpload";
 import DocumentDownload from "./pages/client/DocumentDownload";
@@ -60,6 +62,16 @@ const App = () => (
         <Route path="/admin/settings" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <Settings />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/client-detail/:clientId" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ClientDetail />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/service-details/:serviceId" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ServiceDetail />
           </ProtectedRoute>
         } />
         

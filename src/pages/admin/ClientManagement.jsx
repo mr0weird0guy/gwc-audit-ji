@@ -1,15 +1,18 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Layout from '@/components/Layout';
-import { Search, UserPlus, Mail, Trash, Edit } from 'lucide-react';
+import { Search, Mail, Trash, Edit } from 'lucide-react';
 import { mockAnalytics } from '@/services/mockData';
+import { CreateClientDialog } from '@/components/admin/CreateClientDialog';
 
 const ClientManagement = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const clients = mockAnalytics.clientActivity;
   
@@ -17,14 +20,15 @@ const ClientManagement = () => {
     client.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleRowClick = (clientId) => {
+    navigate(`/admin/client-detail/${clientId}`);
+  };
+
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Client Management</h1>
-        <Button className="flex items-center gap-2">
-          <UserPlus className="h-4 w-4" />
-          Add New Client
-        </Button>
+        <CreateClientDialog />
       </div>
       
       <Card className="mb-6">
@@ -59,7 +63,11 @@ const ClientManagement = () => {
               </TableHeader>
               <TableBody>
                 {filteredClients.map((client, index) => (
-                  <TableRow key={index}>
+                  <TableRow 
+                    key={index} 
+                    className="cursor-pointer"
+                    onClick={() => handleRowClick(`client-${index}`)}
+                  >
                     <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
@@ -68,12 +76,19 @@ const ClientManagement = () => {
                     </TableCell>
                     <TableCell>{client.activeServices}</TableCell>
                     <TableCell>{client.documentsUploaded}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" size="icon">
                           <Mail className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/admin/client-detail/client-${index}`);
+                          }}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon">
