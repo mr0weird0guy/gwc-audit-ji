@@ -9,6 +9,11 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ClientManagement from "./pages/admin/ClientManagement";
+import EmployeeManagement from "./pages/admin/EmployeeManagement";
+import ServiceManagement from "./pages/admin/ServiceManagement";
+import Reports from "./pages/admin/Reports";
+import Settings from "./pages/admin/Settings";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import DocumentUpload from "./pages/client/DocumentUpload";
 import DocumentDownload from "./pages/client/DocumentDownload";
@@ -30,6 +35,31 @@ const App = () => (
         <Route path="/admin/dashboard" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/client-management" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ClientManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/employee-management" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <EmployeeManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/service-management" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ServiceManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/reports" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <Reports />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/settings" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <Settings />
           </ProtectedRoute>
         } />
         
