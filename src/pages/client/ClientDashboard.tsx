@@ -182,7 +182,7 @@ const ClientDashboard: React.FC = () => {
                     <FileText className="h-4 w-4 text-primary" />
                     <div>
                       <p className="font-medium">{doc.name}</p>
-                      <p className="text-xs text-muted-foreground">For: {doc.relatedTo}</p>
+                      <p className="text-xs text-muted-foreground">For: {doc.type}</p>
                     </div>
                   </div>
                   <Button 

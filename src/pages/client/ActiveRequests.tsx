@@ -4,18 +4,28 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Layout from '@/components/Layout';
-import StatusBadge from '@/components/StatusBadge';
+import StatusBadge, { TaskStatus } from '@/components/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
-// Mock active services data
-const activeServices = [
+// Updated interface to match our data structure
+interface ServiceRequest {
+  id: string;
+  name: string;
+  assignedTo: string;
+  deadline: string;
+  status: TaskStatus;
+  progress: number;
+}
+
+// Modified mock data to use proper TaskStatus types
+const activeServices: ServiceRequest[] = [
   {
     id: '1',
     name: 'Tax Filing 2023',
     assignedTo: 'Sarah Johnson',
     deadline: 'May 15, 2023',
-    status: 'in-progress',
+    status: 'ongoing',
     progress: 75,
   },
   {
@@ -23,7 +33,7 @@ const activeServices = [
     name: 'Quarterly Financial Audit',
     assignedTo: 'Michael Chen',
     deadline: 'Apr 30, 2023',
-    status: 'pending-documents',
+    status: 'pending',
     progress: 40,
   },
   {
@@ -31,7 +41,7 @@ const activeServices = [
     name: 'Compliance Check',
     assignedTo: 'Emma Rodriguez',
     deadline: 'Jun 20, 2023',
-    status: 'in-progress',
+    status: 'ongoing',
     progress: 30,
   },
 ];
