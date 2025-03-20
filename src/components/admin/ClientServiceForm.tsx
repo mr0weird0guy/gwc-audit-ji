@@ -3,7 +3,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash } from "lucide-react";
 
 import {
   Form,
@@ -20,73 +19,114 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
+// Mock clients for selection
+const mockClients = [
+  { id: 'client1', name: 'Acme Corporation' },
+  { id: 'client2', name: 'Globex Inc.' },
+  { id: 'client3', name: 'Wayne Enterprises' },
+  { id: 'client4', name: 'Stark Industries' },
+  { id: 'client5', name: 'Oscorp' },
+];
+
+// Mock employees for selection
+const mockEmployees = [
+  { id: 'emp1', name: 'John Doe', role: 'Auditor' },
+  { id: 'emp2', name: 'Jane Smith', role: 'Reviewer' },
+  { id: 'emp3', name: 'Robert Johnson', role: 'Task Manager' },
+  { id: 'emp4', name: 'Sarah Williams', role: 'Auditor' },
+  { id: 'emp5', name: 'Michael Brown', role: 'Reviewer' },
+];
+
 const formSchema = z.object({
-  serviceName: z.string().min(2, { message: "Service name is required." }),
-  assignedEmployee: z.string().min(1, { message: "Please select an employee." }),
+  clientId: z.string().min(1, { message: "Please select a client." }),
+  primaryEmployeeId: z.string().min(1, { message: "Please select a primary employee." }),
+  secondaryEmployeeIds: z.array(z.string()).optional(),
   startDate: z.string().min(1, { message: "Start date is required." }),
   dueDate: z.string().min(1, { message: "Due date is required." }),
-  description: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 interface ClientServiceFormProps {
   clientId?: string;
-  serviceId?: string;
+  serviceTemplateId?: string;
   onSuccess?: () => void;
 }
 
-export function ClientServiceForm({ clientId, serviceId, onSuccess }: ClientServiceFormProps) {
+export function ClientServiceForm({ clientId, serviceTemplateId, onSuccess }: ClientServiceFormProps) {
   const { toast } = useToast();
-  const isEditing = !!serviceId;
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      serviceName: "",
-      assignedEmployee: "",
+      clientId: clientId || "",
+      primaryEmployeeId: "",
+      secondaryEmployeeIds: [],
       startDate: new Date().toISOString().split('T')[0],
       dueDate: "",
-      description: "",
+      notes: "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
-    // Mock API call - would be replaced with actual API call
-    console.log("Service form submitted:", data);
+    // For demonstration, create a payload that would be sent to an API
+    const serviceData = {
+      ...data,
+      serviceTemplateId,
+      status: "pending",
+      progress: 0,
+      created_at: new Date().toISOString(),
+    };
     
+    console.log("Service assignment form submitted:", serviceData);
+    
+    // Show success message
+    const clientName = mockClients.find(c => c.id === data.clientId)?.name;
     toast({
-      title: isEditing ? "Service Updated" : "Service Added",
-      description: `${data.serviceName} has been ${isEditing ? 'updated' : 'added'} successfully.`,
+      title: "Service Assigned",
+      description: `Service has been assigned to ${clientName} successfully.`,
     });
     
     if (onSuccess) {
       onSuccess();
     }
     
-    if (!isEditing) {
-      form.reset();
-    }
+    form.reset();
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isEditing ? "Edit Service" : "Add New Service"}</CardTitle>
+        <CardTitle>Assign Service to Client</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="serviceName"
+                name="clientId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Service Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter service name" {...field} />
-                    </FormControl>
+                    <FormLabel>Client</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select client" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {mockClients.map(client => (
+                          <SelectItem key={client.id} value={client.id}>
+                            {client.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -94,23 +134,25 @@ export function ClientServiceForm({ clientId, serviceId, onSuccess }: ClientServ
               
               <FormField
                 control={form.control}
-                name="assignedEmployee"
+                name="primaryEmployeeId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Assigned Employee</FormLabel>
+                    <FormLabel>Primary Employee</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select employee" />
+                          <SelectValue placeholder="Select primary employee" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="emp1">John Doe</SelectItem>
-                        <SelectItem value="emp2">Jane Smith</SelectItem>
-                        <SelectItem value="emp3">Robert Johnson</SelectItem>
+                        {mockEmployees.map(employee => (
+                          <SelectItem key={employee.id} value={employee.id}>
+                            {employee.name} ({employee.role})
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -119,7 +161,7 @@ export function ClientServiceForm({ clientId, serviceId, onSuccess }: ClientServ
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="startDate"
@@ -151,13 +193,13 @@ export function ClientServiceForm({ clientId, serviceId, onSuccess }: ClientServ
             
             <FormField
               control={form.control}
-              name="description"
+              name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Additional Notes</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Enter service description" 
+                      placeholder="Enter any additional notes for this service assignment" 
                       className="min-h-[100px]" 
                       {...field} 
                     />
@@ -169,7 +211,7 @@ export function ClientServiceForm({ clientId, serviceId, onSuccess }: ClientServ
             
             <div className="flex justify-end gap-2">
               <Button type="submit">
-                {isEditing ? "Update Service" : "Add Service"}
+                Assign Service
               </Button>
             </div>
           </form>
