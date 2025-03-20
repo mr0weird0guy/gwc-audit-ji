@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -11,9 +10,7 @@ import {
   FileText, 
   Upload, 
   Download, 
-  Bell, 
-  BarChart,
-  Settings
+  Bell
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -36,23 +33,18 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole = 'client' }) => {
     { icon: Users, label: 'Client Management', href: '/admin/client-management', roles: ['admin'] },
     { icon: UserCog, label: 'Employee Management', href: '/admin/employee-management', roles: ['admin'] },
     { icon: ClipboardList, label: 'Service Management', href: '/admin/service-management', roles: ['admin'] },
-    { icon: BarChart, label: 'Reports', href: '/admin/reports', roles: ['admin'] },
-    { icon: Settings, label: 'Settings', href: '/admin/settings', roles: ['admin'] },
     
     // Client routes
     { icon: LayoutDashboard, label: 'Dashboard', href: '/client/dashboard', roles: ['client'] },
     { icon: Upload, label: 'Upload Documents', href: '/client/document-upload', roles: ['client'] },
     { icon: Download, label: 'Download Documents', href: '/client/document-download', roles: ['client'] },
     { icon: Bell, label: 'Notifications', href: '/client/notifications', roles: ['client'] },
-    { icon: Settings, label: 'Account Settings', href: '/client/settings', roles: ['client'] },
     
     // Employee routes
     { icon: LayoutDashboard, label: 'Dashboard', href: '/employee/dashboard', roles: ['employee'] },
     { icon: ClipboardList, label: 'Task Details', href: '/employee/task-details', roles: ['employee'] },
     { icon: FileText, label: 'Document Management', href: '/employee/document-management', roles: ['employee'] },
-    { icon: BarChart, label: 'Progress Tracking', href: '/employee/progress-tracking', roles: ['employee'] },
     { icon: Bell, label: 'Notifications', href: '/employee/notifications', roles: ['employee'] },
-    { icon: Settings, label: 'Settings', href: '/employee/settings', roles: ['employee'] },
   ];
 
   const filteredItems = sidebarItems.filter(item => item.roles.includes(userRole));
