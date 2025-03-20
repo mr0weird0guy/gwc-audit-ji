@@ -3,13 +3,13 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Layout from '@/components/Layout';
 import { Search, Plus, Edit, Trash, FileText, Copy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ServiceTemplateDialog } from '@/components/admin/ServiceTemplateDialog';
+import { useToast } from '@/hooks/use-toast';
 
 // Mock service templates based on the ER diagram
 interface ServiceTemplate {
@@ -68,11 +68,13 @@ const mockServiceTemplates: ServiceTemplate[] = [
 
 const ServiceManagement = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ServiceTemplate | null>(null);
+  const [templates, setTemplates] = useState<ServiceTemplate[]>(mockServiceTemplates);
   
-  const filteredTemplates = mockServiceTemplates.filter(template => 
+  const filteredTemplates = templates.filter(template => 
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     template.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -90,6 +92,67 @@ const ServiceManagement = () => {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setSelectedTemplate(null);
+  };
+
+  const handleSaveTemplate = (template: ServiceTemplate) => {
+    if (selectedTemplate) {
+      // Update existing template
+      setTemplates(templates.map(t => 
+        t.id === template.id ? template : t
+      ));
+      toast({
+        title: "Template Updated",
+        description: `${template.name} has been updated successfully`,
+      });
+    } else {
+      // Add new template
+      const newTemplate = {
+        ...template,
+        id: `template-${Date.now()}`,
+        created_at: new Date().toISOString().split('T')[0],
+        assigned_services: 0
+      };
+      setTemplates([...templates, newTemplate]);
+      toast({
+        title: "Template Created",
+        description: `${template.name} has been created successfully`,
+      });
+    }
+    setIsDialogOpen(false);
+    setSelectedTemplate(null);
+  };
+
+  const handleCopyTemplate = (template: ServiceTemplate) => {
+    const copiedTemplate = {
+      ...template,
+      id: `template-${Date.now()}`,
+      name: `${template.name} (Copy)`,
+      created_at: new Date().toISOString().split('T')[0],
+      assigned_services: 0
+    };
+    setTemplates([...templates, copiedTemplate]);
+    toast({
+      title: "Template Copied",
+      description: `A copy of ${template.name} has been created`,
+    });
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    const templateToDelete = templates.find(t => t.id === templateId);
+    if (templateToDelete && templateToDelete.assigned_services > 0) {
+      toast({
+        title: "Cannot Delete Template",
+        description: `This template is being used by ${templateToDelete.assigned_services} active services`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setTemplates(templates.filter(t => t.id !== templateId));
+    toast({
+      title: "Template Deleted",
+      description: "The service template has been deleted",
+    });
   };
 
   return (
@@ -134,49 +197,69 @@ const ServiceManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTemplates.map((template) => (
-                  <TableRow key={template.id}>
-                    <TableCell className="font-medium">{template.name}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{template.description}</TableCell>
-                    <TableCell>{template.documents_required.length}</TableCell>
-                    <TableCell>{template.steps.length}</TableCell>
-                    <TableCell>
-                      {template.assigned_services > 0 ? (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                          {template.assigned_services} active
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-                          None
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => navigate(`/admin/service-details/${template.id}`)}
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleEditTemplate(template)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
+                {filteredTemplates.length > 0 ? (
+                  filteredTemplates.map((template) => (
+                    <TableRow key={template.id}>
+                      <TableCell className="font-medium">{template.name}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">{template.description}</TableCell>
+                      <TableCell>{template.documents_required.length}</TableCell>
+                      <TableCell>{template.steps.length}</TableCell>
+                      <TableCell>
+                        {template.assigned_services > 0 ? (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            {template.assigned_services} active
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                            None
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => navigate(`/admin/service-details/${template.id}`)}
+                            title="View Details"
+                          >
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleEditTemplate(template)}
+                            title="Edit Template"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleCopyTemplate(template)}
+                            title="Duplicate Template"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleDeleteTemplate(template.id)}
+                            title="Delete Template"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                      No service templates found. Create a new template to get started.
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>
@@ -188,6 +271,7 @@ const ServiceManagement = () => {
           open={isDialogOpen} 
           onClose={handleCloseDialog} 
           template={selectedTemplate}
+          onSave={handleSaveTemplate}
         />
       )}
     </Layout>

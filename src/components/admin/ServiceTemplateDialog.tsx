@@ -33,9 +33,10 @@ interface ServiceTemplateDialogProps {
   open: boolean;
   onClose: () => void;
   template: ServiceTemplate | null;
+  onSave: (template: ServiceTemplate) => void;
 }
 
-export function ServiceTemplateDialog({ open, onClose, template }: ServiceTemplateDialogProps) {
+export function ServiceTemplateDialog({ open, onClose, template, onSave }: ServiceTemplateDialogProps) {
   const { toast } = useToast();
   const isEditing = !!template;
   
@@ -98,7 +99,7 @@ export function ServiceTemplateDialog({ open, onClose, template }: ServiceTempla
       return;
     }
 
-    // Prepare the data for API submission
+    // Prepare the data for submission
     const templateData = {
       id: template?.id || `new-${Date.now()}`,
       name,
@@ -110,15 +111,7 @@ export function ServiceTemplateDialog({ open, onClose, template }: ServiceTempla
       assigned_services: template?.assigned_services || 0
     };
 
-    // Here would go the API call to save the template
-    console.log("Saving template:", templateData);
-
-    toast({
-      title: isEditing ? "Template Updated" : "Template Created",
-      description: `${name} has been ${isEditing ? 'updated' : 'created'} successfully.`,
-    });
-
-    onClose();
+    onSave(templateData);
   };
 
   return (
