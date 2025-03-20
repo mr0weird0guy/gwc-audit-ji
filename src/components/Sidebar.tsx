@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -10,7 +11,9 @@ import {
   FileText, 
   Upload, 
   Download, 
-  Bell
+  Bell,
+  CheckCircle,
+  Loader
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -36,9 +39,8 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole = 'client' }) => {
     
     // Client routes
     { icon: LayoutDashboard, label: 'Dashboard', href: '/client/dashboard', roles: ['client'] },
-    { icon: Upload, label: 'Upload Documents', href: '/client/document-upload', roles: ['client'] },
-    { icon: Download, label: 'Download Documents', href: '/client/document-download', roles: ['client'] },
-    { icon: Bell, label: 'Notifications', href: '/client/notifications', roles: ['client'] },
+    { icon: Loader, label: 'Active Requests', href: '/client/active-requests', roles: ['client'] },
+    { icon: CheckCircle, label: 'Completed Requests', href: '/client/completed-requests', roles: ['client'] },
     
     // Employee routes
     { icon: LayoutDashboard, label: 'Dashboard', href: '/employee/dashboard', roles: ['employee'] },

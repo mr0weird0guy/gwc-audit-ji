@@ -12,13 +12,14 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ClientManagement from "./pages/admin/ClientManagement";
 import EmployeeManagement from "./pages/admin/EmployeeManagement";
 import ServiceManagement from "./pages/admin/ServiceManagement";
-import Reports from "./pages/admin/Reports";
-import Settings from "./pages/admin/Settings";
 import ClientDetail from "./pages/admin/ClientDetail";
 import ServiceDetail from "./pages/admin/ServiceDetail";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import DocumentUpload from "./pages/client/DocumentUpload";
 import DocumentDownload from "./pages/client/DocumentDownload";
+import ActiveRequests from "./pages/client/ActiveRequests";
+import CompletedRequests from "./pages/client/CompletedRequests";
+import ServiceDetails from "./pages/client/ServiceDetails";
 import TaskDetails from "./pages/employee/TaskDetails";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -54,16 +55,6 @@ const App = () => (
             <ServiceManagement />
           </ProtectedRoute>
         } />
-        <Route path="/admin/reports" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <Reports />
-          </ProtectedRoute>
-        } />
-        <Route path="/admin/settings" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <Settings />
-          </ProtectedRoute>
-        } />
         <Route path="/admin/client-detail/:clientId" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <ClientDetail />
@@ -89,6 +80,21 @@ const App = () => (
         <Route path="/client/document-download" element={
           <ProtectedRoute allowedRoles={['client']}>
             <DocumentDownload />
+          </ProtectedRoute>
+        } />
+        <Route path="/client/active-requests" element={
+          <ProtectedRoute allowedRoles={['client']}>
+            <ActiveRequests />
+          </ProtectedRoute>
+        } />
+        <Route path="/client/completed-requests" element={
+          <ProtectedRoute allowedRoles={['client']}>
+            <CompletedRequests />
+          </ProtectedRoute>
+        } />
+        <Route path="/client/service-details/:serviceId" element={
+          <ProtectedRoute allowedRoles={['client']}>
+            <ServiceDetails />
           </ProtectedRoute>
         } />
         
