@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Layout from '@/components/Layout';
-import { Search, Plus, Edit, Trash, FileText, Copy } from 'lucide-react';
+import { Search, Plus, Edit, Trash, FileText, Copy, Calendar, User, Clock, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ServiceTemplateDialog } from '@/components/admin/ServiceTemplateDialog';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +22,22 @@ interface ServiceTemplate {
   steps: string[];
   created_at: string;
   assigned_services: number;
+}
+
+// Mock assigned services interface
+interface AssignedService {
+  id: string;
+  templateId: string;
+  templateName: string;
+  clientId: string;
+  clientName: string;
+  primaryEmployeeId: string;
+  primaryEmployeeName: string;
+  startDate: string;
+  dueDate: string;
+  status: "pending" | "in_progress" | "under_review" | "completed" | "cancelled";
+  progress: number;
+  created_at: string;
 }
 
 const mockServiceTemplates: ServiceTemplate[] = [
@@ -66,17 +83,99 @@ const mockServiceTemplates: ServiceTemplate[] = [
   }
 ];
 
+// Mock assigned services data
+const mockAssignedServices: AssignedService[] = [
+  {
+    id: "service1",
+    templateId: "1",
+    templateName: "Annual Financial Audit",
+    clientId: "client1",
+    clientName: "Acme Corporation",
+    primaryEmployeeId: "emp1",
+    primaryEmployeeName: "John Doe",
+    startDate: "2023-07-01",
+    dueDate: "2023-08-15",
+    status: "in_progress",
+    progress: 60,
+    created_at: "2023-06-15",
+  },
+  {
+    id: "service2",
+    templateId: "2",
+    templateName: "Tax Filing",
+    clientId: "client2",
+    clientName: "Globex Inc.",
+    primaryEmployeeId: "emp3",
+    primaryEmployeeName: "Robert Johnson",
+    startDate: "2023-06-10",
+    dueDate: "2023-07-30",
+    status: "under_review",
+    progress: 85,
+    created_at: "2023-06-01",
+  },
+  {
+    id: "service3",
+    templateId: "3",
+    templateName: "Compliance Audit",
+    clientId: "client3",
+    clientName: "Wayne Enterprises",
+    primaryEmployeeId: "emp2",
+    primaryEmployeeName: "Jane Smith",
+    startDate: "2023-05-20",
+    dueDate: "2023-07-10",
+    status: "completed",
+    progress: 100,
+    created_at: "2023-05-15",
+  },
+  {
+    id: "service4",
+    templateId: "1",
+    templateName: "Annual Financial Audit",
+    clientId: "client4",
+    clientName: "Stark Industries",
+    primaryEmployeeId: "emp4",
+    primaryEmployeeName: "Sarah Williams",
+    startDate: "2023-08-01",
+    dueDate: "2023-09-30",
+    status: "pending",
+    progress: 10,
+    created_at: "2023-07-25",
+  },
+  {
+    id: "service5",
+    templateId: "2",
+    templateName: "Tax Filing",
+    clientId: "client5",
+    clientName: "Oscorp",
+    primaryEmployeeId: "emp5",
+    primaryEmployeeName: "Michael Brown",
+    startDate: "2023-07-15",
+    dueDate: "2023-08-30",
+    status: "in_progress",
+    progress: 45,
+    created_at: "2023-07-10",
+  }
+];
+
 const ServiceManagement = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [serviceSearchQuery, setServiceSearchQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ServiceTemplate | null>(null);
   const [templates, setTemplates] = useState<ServiceTemplate[]>(mockServiceTemplates);
+  const [assignedServices, setAssignedServices] = useState<AssignedService[]>(mockAssignedServices);
   
   const filteredTemplates = templates.filter(template => 
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     template.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredServices = assignedServices.filter(service => 
+    service.templateName.toLowerCase().includes(serviceSearchQuery.toLowerCase()) ||
+    service.clientName.toLowerCase().includes(serviceSearchQuery.toLowerCase()) ||
+    service.primaryEmployeeName.toLowerCase().includes(serviceSearchQuery.toLowerCase())
   );
 
   const handleEditTemplate = (template: ServiceTemplate) => {
@@ -155,6 +254,24 @@ const ServiceManagement = () => {
     });
   };
 
+  // Helper function to get status badge styles
+  const getStatusBadge = (status: AssignedService['status']) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Pending</Badge>;
+      case 'in_progress':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">In Progress</Badge>;
+      case 'under_review':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Under Review</Badge>;
+      case 'completed':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Cancelled</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
+    }
+  };
+
   return (
     <Layout>
       <div className="flex items-center justify-between mb-6">
@@ -165,106 +282,204 @@ const ServiceManagement = () => {
         </Button>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Service Templates</CardTitle>
-          <CardDescription>Manage service templates that can be assigned to clients</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-2 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search templates..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Template Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Required Documents</TableHead>
-                  <TableHead>Steps</TableHead>
-                  <TableHead>Active Services</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTemplates.length > 0 ? (
-                  filteredTemplates.map((template) => (
-                    <TableRow key={template.id}>
-                      <TableCell className="font-medium">{template.name}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">{template.description}</TableCell>
-                      <TableCell>{template.documents_required.length}</TableCell>
-                      <TableCell>{template.steps.length}</TableCell>
-                      <TableCell>
-                        {template.assigned_services > 0 ? (
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                            {template.assigned_services} active
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-                            None
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => navigate(`/admin/service-details/${template.id}`)}
-                            title="View Details"
-                          >
-                            <FileText className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleEditTemplate(template)}
-                            title="Edit Template"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleCopyTemplate(template)}
-                            title="Duplicate Template"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => handleDeleteTemplate(template.id)}
-                            title="Delete Template"
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+      <Tabs defaultValue="templates" className="w-full">
+        <TabsList className="w-full max-w-md mb-6">
+          <TabsTrigger value="templates" className="flex-1">Service Templates</TabsTrigger>
+          <TabsTrigger value="assigned" className="flex-1">Assigned Services</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="templates">
+          <Card>
+            <CardHeader>
+              <CardTitle>Service Templates</CardTitle>
+              <CardDescription>Manage service templates that can be assigned to clients</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search templates..."
+                    className="pl-8"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Template Name</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Required Documents</TableHead>
+                      <TableHead>Steps</TableHead>
+                      <TableHead>Active Services</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
-                      No service templates found. Create a new template to get started.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTemplates.length > 0 ? (
+                      filteredTemplates.map((template) => (
+                        <TableRow key={template.id}>
+                          <TableCell className="font-medium">{template.name}</TableCell>
+                          <TableCell className="max-w-[200px] truncate">{template.description}</TableCell>
+                          <TableCell>{template.documents_required.length}</TableCell>
+                          <TableCell>{template.steps.length}</TableCell>
+                          <TableCell>
+                            {template.assigned_services > 0 ? (
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                {template.assigned_services} active
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                                None
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => navigate(`/admin/service-details/${template.id}`)}
+                                title="View Details"
+                              >
+                                <FileText className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleEditTemplate(template)}
+                                title="Edit Template"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleCopyTemplate(template)}
+                                title="Duplicate Template"
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleDeleteTemplate(template.id)}
+                                title="Delete Template"
+                              >
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                          No service templates found. Create a new template to get started.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="assigned">
+          <Card>
+            <CardHeader>
+              <CardTitle>Assigned Services</CardTitle>
+              <CardDescription>View all services assigned to clients across the organization</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search services by template, client or employee..."
+                    className="pl-8"
+                    value={serviceSearchQuery}
+                    onChange={(e) => setServiceSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Service</TableHead>
+                      <TableHead>Client</TableHead>
+                      <TableHead>Primary Employee</TableHead>
+                      <TableHead>Timeline</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Progress</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredServices.length > 0 ? (
+                      filteredServices.map((service) => (
+                        <TableRow key={service.id}>
+                          <TableCell className="font-medium">{service.templateName}</TableCell>
+                          <TableCell>{service.clientName}</TableCell>
+                          <TableCell>{service.primaryEmployeeName}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col text-sm">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3 text-muted-foreground" />
+                                Start: {service.startDate}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3 text-muted-foreground" />
+                                Due: {service.dueDate}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(service.status)}</TableCell>
+                          <TableCell>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                              <div 
+                                className="bg-primary h-2.5 rounded-full" 
+                                style={{ width: `${service.progress}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs text-gray-500 mt-1">{service.progress}%</span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="flex items-center gap-1"
+                              onClick={() => navigate(`/admin/service-details/${service.id}`)}
+                            >
+                              <ArrowUpRight className="h-3 w-3" />
+                              Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
+                          No assigned services found matching your search.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {isDialogOpen && (
         <ServiceTemplateDialog 
